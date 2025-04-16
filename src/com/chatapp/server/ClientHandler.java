@@ -1,4 +1,4 @@
-package server;
+package com.chatapp.server;
 
 import java.io.*;
 import java.net.*;
