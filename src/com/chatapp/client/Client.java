@@ -1,6 +1,10 @@
+package com.chatapp.client;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
+
+import com.chatapp.cryptography.*;
 
 /**
  * Client class for connecting to a chat server, sending encrypted messages, 
@@ -15,7 +19,7 @@ import java.util.Scanner;
  * handles sending messages to ensure smooth communication.
  * 
  * @author Philip Jonsson
- * @version 2025-04-14
+ * @version 2025-04-16
  */
 public class Client {
     private final String host;
@@ -33,20 +37,24 @@ public class Client {
      * Connects to the server and sets up I/O streams for communication.
      */
     public void start() {
-        try (Socket socket = new Socket(host, port);
+        try (
+            // Establish socket connection to server
+            Socket socket = new Socket(host, port);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); // Reader for incoming messages
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true); // Writer for outgoing messages
-            Scanner scanner = new Scanner(System.in)) { // Scanner for user input
+            Scanner scanner = new Scanner(System.in) // Scanner for user input
+            ) { 
 
             System.out.println("Connected to the chat server.");
             System.out.println("Type your message and hit Enter. Type 'exit' to disconnect.");
 
             // Launch a separate thread to listen for incoming messages
             Thread listenerThread = new Thread(() -> listenForMessages(in));
+            listenerThread.setDaemon(true); // Make listener thread a daemon thread to exit when main thread exits
             listenerThread.start();
 
             // Main thread handles sending user messages
-            handleOutgoingMessages(scanner, out);
+            sendMessages(scanner, out);
 
             System.out.println("Disconnected.");
 
@@ -79,9 +87,10 @@ public class Client {
      * Reads user input, encrypts it, and sends it to the server.
      * Typing 'exit' will terminate the connection.
      */
-    private void handleOutgoingMessages(Scanner scanner, PrintWriter out) {
+    private void sendMessages(Scanner scanner, PrintWriter out) {
         while (true) {
             String message = scanner.nextLine();
+
             if ("exit".equalsIgnoreCase(message)) {
                 System.out.println("Exiting chat...");
                 break;

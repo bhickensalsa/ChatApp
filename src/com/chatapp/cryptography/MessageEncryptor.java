@@ -1,3 +1,5 @@
+package com.chatapp.cryptography;
+
 /**
  * Interface for message encryption and decryption.
  * 

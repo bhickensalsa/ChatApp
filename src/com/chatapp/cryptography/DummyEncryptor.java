@@ -1,3 +1,5 @@
+package com.chatapp.cryptography;
+
 /**
  * A simple implementation of the MessageEncryptor interface for testing purposes.
  * 
