@@ -2,6 +2,7 @@ package com.chatapp;
 
 import com.chatapp.client.*;
 import com.chatapp.cryptography.*;
+import com.chatapp.gui.ChatGUI;
 import com.chatapp.server.*;
 
 public class launcher {
@@ -29,6 +30,7 @@ public class launcher {
             SecureMessenger clientEncryptor = new SecureMessenger();
             Client client = new Client(host, port, clientEncryptor);
             client.start();
+            ChatGUI gui = new ChatGUI(client);
         } catch (Exception e) {
             System.err.println("Failed to start client: " + e.getMessage());
         }
