@@ -1,5 +1,7 @@
 package com.chatapp.cryptography;
 
+import java.security.PublicKey;
+
 /**
  * Interface for message encryption and decryption.
  * 
@@ -8,17 +10,23 @@ package com.chatapp.cryptography;
  * to ensure that the messages can be securely transmitted over a network or other communication medium.
  * 
  * @author Philip Jonsson
- * @version 2025-04-14
+ * @author Mohamed El Yahioui
+ * @version 2025-04-25
  */
 public interface MessageEncryptor {
 
     /**
      * Encrypts the given message.
      */
-    String encrypt(String message) throws Exception;
+    String encrypt(String message, PublicKey receiverPublicKey) throws Exception;
 
     /**
      * Decrypts the given message.
      */
-    String decrypt(String message) throws Exception;
+    String decrypt(String encryptedMessage) throws Exception;
+
+    /**
+     * Returns the public key of the encryptor.
+     */
+    PublicKey getPublicKey();
 }
