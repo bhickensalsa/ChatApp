@@ -2,9 +2,15 @@ package com.chatapp;
 
 import com.chatapp.client.*;
 import com.chatapp.cryptography.*;
-import com.chatapp.gui.ChatGUI;
+import com.chatapp.gui.*;
 import com.chatapp.server.*;
 
+/**
+ * Early draft launcher class for starting the chat app
+ * Starts a server instance, waits one second, then starts a client with GUI.
+ * 
+ * @version 2025-04-30
+ */
 public class launcher {
     public static void main(String[] args) throws Exception {
         int port = 12345;
@@ -30,7 +36,7 @@ public class launcher {
             SecureMessenger clientEncryptor = new SecureMessenger();
             Client client = new Client(host, port, clientEncryptor);
             client.start();
-            ChatGUI gui = new ChatGUI(client);
+            new ChatGUI(client);
         } catch (Exception e) {
             System.err.println("Failed to start client: " + e.getMessage());
         }

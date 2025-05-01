@@ -1,81 +1,96 @@
 package com.chatapp.gui;
 
 import java.awt.*;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import com.chatapp.client.*;
-import com.chatapp.cryptography.SecureMessenger;
 
 /**
  * Early draft GUI
- * @author Philip Jonsosn
- * @version 2025-04-29
+ * @author Philip Jonsson
+ * @version 2025-04-30
  */
-
 public class ChatGUI {
     private Client client;
     private JFrame frame;
     private JTextArea chatArea;
     private JTextField inputField;
     private JButton sendButton;
+    private JList<String> userList;
+    private DefaultListModel<String> userListModel;
 
+    /**
+     * Initialize GUI with components, and 
+     * set Consumer to receive messages from client.
+     * @param client
+     */
     public ChatGUI(Client client) {
         this.client = client;
-        frame = new JFrame("ChatApp");
+
+        frame = new JFrame("DD1349 - ChatApp"); // App window
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
 
+        // === Chat Area ===
         chatArea = new JTextArea();
         chatArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(chatArea);
+        JScrollPane chatScrollPane = new JScrollPane(chatArea);
+        frame.add(chatScrollPane, BorderLayout.CENTER);
 
+        // === Input Panel ===
         JPanel inputPanel = new JPanel();
         inputPanel.setLayout(new BorderLayout());
-        
         inputField = new JTextField();
         sendButton = new JButton("Send");
-
         inputPanel.add(inputField, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
-
-        frame.add(scrollPane, BorderLayout.CENTER);
         frame.add(inputPanel, BorderLayout.SOUTH);
 
+        // === User List Panel ===
+        userListModel = new DefaultListModel<>();
+        userList = new JList<>(userListModel);
+        userList.setBorder(BorderFactory.createTitledBorder("Users"));
+        JScrollPane userListScrollPane = new JScrollPane(userList);
+        userListScrollPane.setPreferredSize(new Dimension(200, 0)); // width only
+        frame.add(userListScrollPane, BorderLayout.EAST);
+
+        // === Event Listeners ===
         sendButton.addActionListener(e -> handleSend());
         inputField.addActionListener(e -> handleSend());
 
+        client.setConsumer(this::displayMessage); // Connect consumer to displayMessage
+
         frame.setVisible(true);
     }
-    
+
+    /** 
+     * Helper method to handle sending messages using the GUI
+     */
     private void handleSend() {
         String message = inputField.getText().trim();
-        if (message.isEmpty()) {
-            return;
-        }
+        if (message.isEmpty()) return;
+
         if ("exit".equalsIgnoreCase(message)) {
-            System.err.println("Exiting chat...");
+            client.log("[System] Exiting chat...");
             frame.dispose();
             client.stop();
+            return;
         }
+
         try {
             client.sendMessage(message);
-            chatArea.append("You: " + message + "\n");
+            client.log("You: " + message);
             inputField.setText("");
         } catch (Exception e) {
-            chatArea.append("[Error] " + e.getMessage() + "\n");
+            client.log("[Error] " + e.getMessage());
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        SecureMessenger clientEncryptor = new SecureMessenger();
-        Client client = new Client("localhost", 12345, clientEncryptor);
-        client.start();
-        ChatGUI gui = new ChatGUI(client);
+    /**
+     * Helper method to display messages in the chatArea
+     */
+    public void displayMessage(String message) {
+        SwingUtilities.invokeLater(() -> chatArea.append(message + "\n"));
     }
 }
